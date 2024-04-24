@@ -1,328 +1,350 @@
 Vehicle to Edge:
 import java.util.PriorityQueue;
-class Request implements Comparable&lt;Request&gt; {
-private boolean isHighPriority;
-private String content;
-private long arrivalTime;
-private int vehicleId;
-public Request(boolean isHighPriority, String content, long arrivalTime, int vehicleId) {
-this.isHighPriority = isHighPriority;
-this.content = content;
-this.arrivalTime = arrivalTime;
-this.vehicleId = vehicleId;
-}
-public boolean isHighPriority() {
-return isHighPriority;
-}
-public String getContent() {
-return content;
-}
-public long getArrivalTime() {
-return arrivalTime;
-}
-public int getVehicleId() {
-return vehicleId;
-}
-@Override
-public int compareTo(Request other) {
-if (this.isHighPriority() &amp;&amp; !other.isHighPriority()) {
-return -1; // This request has higher priority
-} else if (!this.isHighPriority() &amp;&amp; other.isHighPriority()) {
-return 1; // Other request has higher priority
-} else {
-// Both requests have the same priority, use arrival time as tie-breaker
-return Long.compare(this.arrivalTime, other.arrivalTime);
-}
+
+class req implements Comparable<req> {
+    private boolean highpriority;
+    private String Cont;//content
+    private long Arrivaltime;
+    private int VehicleId;
+
+    public req(boolean highpriority, String Cont, long Arrivaltime, int VehicleId) {
+        this.highpriority = highpriority;
+        this.Cont = Cont;
+        this.Arrivaltime = Arrivaltime;
+        this.VehicleId = VehicleId;
+    }
+
+    public boolean highpriority() {
+        return highpriority;
+    }
+
+    public String getContent() {
+        return Cont;
+    }
+
+    public long getArrivalTime() {
+        return Arrivaltime;
+    }
+
+    public int getVehicleId() {
+        return VehicleId;
+    }
+
+    @Override
+    public int compareTo(req other) {
+        if (this.highpriority() && !other.highpriority()) {
+            return -1; // High Priority
+        } else if (!this.highpriority() && other.highpriority()) {
+            return 1; // Other req high priority
+        } else {
+            // Both requests have the same priority
+            return Long.compare(this.Arrivaltime, other.Arrivaltime);
+        }
+    }
 }
 
-}
-class EdgeServer {
-private PriorityQueue&lt;Request&gt; requestQueue;
-public EdgeServer() {
-requestQueue = new PriorityQueue&lt;&gt;();
-}
-public void processRequest(Request request) {
-long startTime = System.currentTimeMillis();
-System.out.println(&quot;Processing request from vehicle &quot; + request.getVehicleId() + &quot;: &quot; +
-request.getContent() + &quot; with priority &quot; + (request.isHighPriority() ? &quot;high&quot; : &quot;low&quot;));
-// Simulate processing time
-try {
-Thread.sleep(100); // Simulate processing time of 100 millisecond
-} catch (InterruptedException e) {
-e.printStackTrace();
-}
-long endTime = System.currentTimeMillis();
-long responseTime = endTime - startTime;
-System.out.println(&quot;Response time for request from vehicle &quot; + request.getVehicleId() + &quot;: &quot; +
-request.getContent() + &quot; is &quot; + responseTime + &quot; milliseconds&quot;);
-}
-public void addRequest(Request request) {
-requestQueue.add(request);
-}
-public boolean hasRequests() {
-return !requestQueue.isEmpty();
-}
-public Request getNextRequest() {
-return requestQueue.poll();
-}
-}
-public class RequestProcessor {
-public static void main(String[] args) {
-EdgeServer edgeServer = new EdgeServer();
-// Simulate incoming requests from vehicles
-int vehicleId = 1;
+class Edge {
+    private PriorityQueue<req> requestQueue;
 
-for (int i = 0; i &lt; 9; i++) { // Simulate 9 vehicles
-for (int j = 0; j &lt; 25; j++) { // Simulate 25 requests per vehicle
-boolean isHighPriority = Math.random() &lt; 0.5; // Randomly assign high or low priority
-String content = &quot;Request &quot; + (j + 1) + &quot; from vehicle &quot; + vehicleId;
-long arrivalTime = System.currentTimeMillis(); // Record arrival time
-Request request = new Request(isHighPriority, content, arrivalTime, vehicleId);
-edgeServer.addRequest(request);
+    public Edge() {
+        requestQueue = new PriorityQueue<>();
+    }
+
+    public void ProcessRequest(req req) {
+        long startTime = System.currentTimeMillis();
+        System.out.println("Processing req from vehicle " + req.getVehicleId() + ": " + req.getContent() + " with priority " + (req.highpriority() ? "high" : "low"));
+        // Simulate processing time
+        try {
+            Thread.sleep(100); // Simulate processing time of 100 millisecond
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        long endTime = System.currentTimeMillis();
+        long responseTime = endTime - startTime;
+        System.out.println("Response time for req from vehicle " + req.getVehicleId() + ": " + req.getContent() + " is " + responseTime + " milliseconds");
+    }
+
+    public void addReq(req req) {
+        requestQueue.add(req);
+    }
+
+    public boolean hasReq() {
+        return !requestQueue.isEmpty();
+    }
+
+    public req getNextReq() {
+        return requestQueue.poll();
+    }
 }
-vehicleId++; // Increment vehicle ID for each vehicle
+
+public class Main {
+    public static void main(String[] args) {
+        Edge edgeServer = new Edge();
+
+        // Simulate incoming requests from vehicles
+        int VehicleId = 1;
+        for (int i = 0; i < 9; i++) { // Simulate 9 vehicles
+            for (int j = 0; j < 25; j++) { // Simulate 25 requests per vehicle
+                boolean highpriority = Math.random() < 0.5; // Randomly assign high or low priority
+                String Cont = "req " + (j + 1) + " from vehicle " + VehicleId;
+                long Arrivaltime = System.currentTimeMillis(); // Record arrival time
+                req req = new req(highpriority, Cont, Arrivaltime, VehicleId);
+                edgeServer.addReq(req);
+            }
+            VehicleId++; // vehicle ID for each vehicle increment
+        }
+
+        // Processing requests based on priorities
+        while (edgeServer.hasReq()) {
+            req req = edgeServer.getNextReq();
+            edgeServer.ProcessRequest(req);
+        }
+    }
 }
-// Process requests based on priority
-while (edgeServer.hasRequests()) {
-Request request = edgeServer.getNextRequest();
-edgeServer.processRequest(request);
-}
-}
-}
---------------------------------------
+
+
 Edge to cloud:
 
+
+//Edges to Cloud
 import java.util.PriorityQueue;
-class Request {
-int priority;
-String region;
-public Request(int priority, String region) {
-this.priority = priority;
-this.region = region;
-}
-}
-class Edge {
-int capacity;
-int load;
-PriorityQueue&lt;Request&gt; requests;
-long cloudResponseTime;
-public Edge(int capacity) {
-this.capacity = capacity;
-this.load = 0;
 
-this.requests = new PriorityQueue&lt;&gt;((r1, r2) -&gt; r2.priority - r1.priority); // Higher priority first
-this.cloudResponseTime = 0;
-}
-public void addRequest(Request request) {
-if (load &lt; capacity) {
-requests.add(request);
-load++;
-} else {
-// Redirect to cloud with longer response time
-long startTime = System.nanoTime();
-System.out.println(&quot;Redirecting request to cloud, Edge: &quot; + request.region + &quot;, Priority: &quot; +
-request.priority);
-long endTime = System.nanoTime();
-long responseTime = (long) (endTime - startTime + Math.random() * 1000000); // Simulating
-longer response time
-System.out.println(&quot;Response time from cloud: &quot; + responseTime + &quot; nanoseconds&quot;);
-// Update cloud response time
-cloudResponseTime += responseTime;
-// Decrease load on edge
-load--;
-}
-}
-public void processRequests() {
-// Process requests based on priority
-for (int priority = 1; priority &gt;= 0; priority--) { // Changed to 1 for high priority, 0 for low priority
-while (!requests.isEmpty() &amp;&amp; requests.peek().priority == priority) {
-Request request = requests.poll();
-System.out.println(&quot;Processing request from edge: &quot; + request.region + &quot;, Priority: &quot; +
-request.priority);
-long startTime = System.nanoTime();
-// Simulating processing time
-try {
-Thread.sleep((long) (Math.random() * 100)); // Simulating processing time between 0
-and 100 milliseconds
-} catch (InterruptedException e) {
-e.printStackTrace();
-}
-long endTime = System.nanoTime();
-long responseTime = endTime - startTime;
-System.out.println(&quot;Response time for processing: &quot; + responseTime + &quot; nanoseconds&quot;);
-// Update cloud response time
-cloudResponseTime += responseTime;
+class Req {
+    int Priority;
+    String Region;
 
-// Decrease load on edge
-load--;
+    public Req(int Priority, String Region) {
+        this.Priority = Priority;
+        this.Region = Region;
+    }
 }
+
+class Edges {
+    int avail;
+    int space;
+    PriorityQueue<Req> requests;
+    long cloudResponseTime;
+
+    public Edges(int avail) {
+        this.avail = avail;
+        this.space = 0;
+        this.requests = new PriorityQueue<>((r1, r2) -> r2.Priority - r1.Priority); // Higher Priority first
+        this.cloudResponseTime = 0;
+    }
+
+    public void addReq(Req request) {
+        if (space < avail) {
+            requests.add(request);
+            space++;
+        } else {
+            // Redirect to cloud with longer response time
+            long startTime = System.nanoTime();
+            System.out.println("Redirecting request to cloud, Edges: " + request.Region + ", Priority: " + request.Priority);
+            long endTime = System.nanoTime();
+            long responseTime = (long) (endTime - startTime + Math.random() * 1000000); // Simulating longer response time
+            System.out.println("Response time from cloud: " + responseTime + " nanoseconds");
+            // Update cloud response time
+            cloudResponseTime += responseTime;
+            // Decrease space on edge
+            space--;
+        }
+    }
+
+    public void processReq() {
+        // Process requests based on Priority
+        for (int Priority = 1; Priority >= 0; Priority--) { // Changed to 1 for high Priority, 0 for low Priority
+            while (!requests.isEmpty() && requests.peek().Priority == Priority) {
+                Req request = requests.poll();
+                System.out.println("Processing request from edge: " + request.Region + ", Priority: " + request.Priority);
+                long startTime = System.nanoTime();
+                // Simulating processing time
+                try {
+                    Thread.sleep((long) (Math.random() * 100)); // Simulating processing time between 0 and 100 milliseconds
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                long endTime = System.nanoTime();
+                long responseTime = endTime - startTime;
+                System.out.println("Response time for processing: " + responseTime + " nanoseconds");
+                // Update cloud response time
+                cloudResponseTime += responseTime;
+                // Decrease space on edge
+                space--;
+            }
+        }
+    }
 }
-}
-}
+
 public class Main {
-public static void main(String[] args) {
-Edge[] edges = new Edge[9];
-for (int i = 0; i &lt; 9; i++) {
-edges[i] = new Edge(25);
+    public static void main(String[] args) {
+        Edges[] edges = new Edges[9];
+        for (int i = 0; i < 9; i++) {
+            edges[i] = new Edges(25);
+        }
+
+        // Add 25 requests from each edge server to the cloud
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 25; j++) {
+                int Priority = j % 2; // Only two Priority levels: 0 (low) and 1 (high)
+                edges[i].addReq(new Req(Priority, "Region" + (i + 1)));
+            }
+        }
+
+        // Process requests for each edge
+        for (Edges edge : edges) {
+            edge.processReq();
+        }
+
+        // Calculate average cloud response time
+        long totalRespTime = 0;
+        for (Edges edge : edges) {
+            totalRespTime += edge.cloudResponseTime;
+        }
+        long avgCloudRespTime = totalRespTime / 225; // Total requests = 225 (9 edges * 25 requests per edge)
+        System.out.println("Average cloud response time: " + avgCloudRespTime + " nanoseconds");
+    }
 }
-// Add 25 requests from each edge server to the cloud
-for (int i = 0; i &lt; 9; i++) {
-for (int j = 0; j &lt; 25; j++) {
-int priority = j % 2; // Only two priority levels: 0 (low) and 1 (high)
-edges[i].addRequest(new Request(priority, &quot;region&quot; + (i + 1)));
-}
-}
-// Process requests for each edge
-for (Edge edge : edges) {
-edge.processRequests();
-}
-// Calculate average cloud response time
-long totalCloudResponseTime = 0;
-for (Edge edge : edges) {
-totalCloudResponseTime += edge.cloudResponseTime;
-}
-long averageCloudResponseTime = totalCloudResponseTime / 225; // Total requests = 225 (9
-edges * 25 requests per edge)
-System.out.println(&quot;Average cloud response time: &quot; + averageCloudResponseTime + &quot;
-nanoseconds&quot;);
-}
-}
---------------------------------------
-Edge to Fog:
+
+
+Edge to Fog: 
+
 import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 class Request {
-int priority;
-String region;
-public Request(int priority, String region) {
-this.priority = priority;
-this.region = region;
+    int Priority;
+    String region;
+
+    public Request(int Priority, String region) {
+        this.Priority = Priority;
+        this.region = region;
+    }
 }
-}
+
 class Edge {
-int capacity;
-int load;
-ConcurrentHashMap&lt;String, PriorityQueue&lt;Request&gt;&gt; requests;
-ConcurrentHashMap&lt;String, Long&gt; fogResponseTimes;
-public Edge(int capacity) {
-this.capacity = capacity;
-this.load = 0;
-this.requests = new ConcurrentHashMap&lt;&gt;();
-this.fogResponseTimes = new ConcurrentHashMap&lt;&gt;();
-// Initialize regions and fog nodes
-for (int i = 0; i &lt; 9; i++) {
-String region = &quot;region&quot; + i;
-requests.put(region, new PriorityQueue&lt;&gt;((r1, r2) -&gt; r2.priority - r1.priority)); // Higher priority
-first
-if (i &lt; 3) {
-String fogNode = &quot;fog&quot; + (i + 1); // Fog nodes are fog1, fog2, fog3
-requests.put(fogNode, new PriorityQueue&lt;&gt;((r1, r2) -&gt; r2.priority - r1.priority)); // Higher
-priority first
-fogResponseTimes.put(fogNode, 0L);
-}
-}
-}
-public void addRequest(Request request) {
-if (load &lt; capacity) {
-requests.get(request.region).add(request);
-load++;
-} else {
-// Redirect to a fog node with minimum response time
-String fogNode = findAvailableFogNode(request.priority);
-if (fogNode != null) {
+    int Capacity;
+    int Load;
+    ConcurrentHashMap<String, PriorityQueue<Request>> reqs;
+    ConcurrentHashMap<String, Long> fogRespTime;
 
-long startTime = System.nanoTime();
-System.out.println(&quot;Redirecting request to fog node: &quot; + fogNode + &quot;, Priority: &quot; +
-request.priority);
-long endTime = System.nanoTime();
-long responseTime = endTime - startTime;
-System.out.println(&quot;Response time from fog node: &quot; + responseTime + &quot; nanoseconds&quot;);
-// Decrease load on edge
-load--;
-// Update fog response time
-fogResponseTimes.put(fogNode, fogResponseTimes.get(fogNode) + responseTime);
-} else {
-System.out.println(&quot;Edge is at full capacity and no fog node available. Cannot process request.&quot;);
-}
-}
-}
-private String findAvailableFogNode(int priority) {
-// Simulate finding the fog node with minimum response time
-String minFogNode = null;
-long minResponseTime = Long.MAX_VALUE;
-for (String fogNode : requests.keySet()) {
-if (fogNode.startsWith(&quot;fog&quot;) &amp;&amp; fogResponseTimes.get(fogNode) &lt; minResponseTime) {
-minResponseTime = fogResponseTimes.get(fogNode);
-minFogNode = fogNode;
-}
-}
-return minFogNode;
-}
-public void processRequests() {
-// Process requests based on priority
-for (int priority = 1; priority &gt;= 0; priority--) { // Changed to 1 for high priority, 0 for low priority
-synchronized (requests) {
-for (PriorityQueue&lt;Request&gt; queue : requests.values()) {
-while (!queue.isEmpty() &amp;&amp; queue.peek().priority == priority) {
-Request request = queue.poll();
-System.out.println(&quot;Processing request: &quot; + request.region + &quot;, Priority: &quot; + request.priority
-+
-&quot;, Processing on fog node: &quot; + getFogNode(request.region));
-long startTime = System.nanoTime();
-// Simulating processing time
-try {
+    public Edge(int Capacity) {
+        this.Capacity = Capacity;
+        this.Load = 0;
+        this.reqs = new ConcurrentHashMap<>();
+        this.fogRespTime = new ConcurrentHashMap<>();
+        // Initializing the region and fog nodes
+        for (int i = 0; i < 9; i++) {
+            String region = "region" + i;
+            reqs.put(region, new PriorityQueue<>((r1, r2) -> r2.Priority - r1.Priority)); // Higher Priority first
+            if (i < 3) {
+                String fogNode = "fog" + (i + 1); // Fog nodes are fog1, fog2, fog3
+                reqs.put(fogNode, new PriorityQueue<>((r1, r2) -> r2.Priority - r1.Priority)); // Higher Priority first
+                fogRespTime.put(fogNode, 0L);
+            }
+        }
+    }
 
-Thread.sleep((long) (Math.random() * 100)); // Simulating processing time between 0
-and 100 milliseconds
-} catch (InterruptedException e) {
-e.printStackTrace();
+    public void addReq(Request request) {
+        if (Load < Capacity) {
+            reqs.get(request.region).add(request);
+            Load++;
+        } else {
+            // Redirecting fog node with min resp time
+            String fogNode = findAvailNode(request.Priority);
+            if (fogNode != null) {
+                long startTime = System.nanoTime();
+                System.out.println("Redirecting request to fog node: " + fogNode + ", Priority: " + request.Priority);
+                long endTime = System.nanoTime();
+                long respTime = endTime - startTime;
+                System.out.println("Response time from fog node: " + respTime + " nanoseconds");
+                // -- Load on edge
+                Load--;
+                // Updating the fog resp time
+                fogRespTime.put(fogNode, fogRespTime.get(fogNode) + respTime);
+            } else {
+                System.out.println("Edge is at full Capacity and no fog node available. Cannot process request.");
+            }
+        }
+    }
+
+    private String findAvailNode(int Priority) {
+        // Simulating the fog node with min resp time
+        String minFog = null;
+        long minRespTime = Long.MAX_VALUE;
+
+        for (String fogNode : reqs.keySet()) {
+            if (fogNode.startsWith("fog") && fogRespTime.get(fogNode) < minRespTime) {
+                minRespTime = fogRespTime.get(fogNode);
+                minFog = fogNode;
+            }
+        }
+        return minFog;
+    }
+
+    public void processReq() {
+        // Processing the request based on Priority
+        for (int Priority = 1; Priority >= 0; Priority--) { // Changed to 1 for high Priority, 0 for low Priority
+            synchronized (reqs) {
+                for (PriorityQueue<Request> queue : reqs.values()) {
+                    while (!queue.isEmpty() && queue.peek().Priority == Priority) {
+                        Request request = queue.poll();
+                        System.out.println("Processing request: " + request.region + ", Priority: " + request.Priority +
+                                ", Processing on fog node: " + getFogs(request.region));
+                        long startTime = System.nanoTime();
+                        // Simulating the processing time
+                        try {
+                            Thread.sleep((long) (Math.random() * 100)); // Simulating processing time between 0 and 100 milliseconds
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        long endTime = System.nanoTime();
+                        long respTime = endTime - startTime;
+                        System.out.println("Response time for processing: " + respTime + " nanoseconds");
+                        // Updating the  fog resp time
+                        fogRespTime.put(getFogs(request.region), fogRespTime.get(getFogs(request.region)) + respTime);
+                        Load--;
+                    }
+                }
+            }
+        }
+    }
+
+    private String getFogs(String region) {
+        return region.startsWith("region") ? "fog" + (Integer.parseInt(region.substring(6)) / 3 + 1) : null;
+    }
 }
-long endTime = System.nanoTime();
-long responseTime = endTime - startTime;
-System.out.println(&quot;Response time for processing: &quot; + responseTime + &quot; nanoseconds&quot;);
-// Update fog response time
-fogResponseTimes.put(getFogNode(request.region),
-fogResponseTimes.get(getFogNode(request.region)) + responseTime);
-load--;
-}
-}
-}
-}
-}
-private String getFogNode(String region) {
-return region.startsWith(&quot;region&quot;) ? &quot;fog&quot; + (Integer.parseInt(region.substring(6)) / 3 + 1) : null;
-}
-}
+//Main class
 public class Main {
-public static void main(String[] args) {
-Edge[] edges = new Edge[9];
-for (int i = 0; i &lt; 9; i++) {
-edges[i] = new Edge(25);
-}
-for (int i = 0; i &lt; 75; i++) {
-// Add requests with different priorities
-int priority = i % 2; // Only two priority levels: 0 (low) and 1 (high)
-if (i &lt; 25) {
-edges[0].addRequest(new Request(priority, &quot;region0&quot;));
-edges[1].addRequest(new Request(priority, &quot;region1&quot;));
-edges[2].addRequest(new Request(priority, &quot;region2&quot;));
-} else if (i &lt; 50) {
-edges[3].addRequest(new Request(priority, &quot;region3&quot;));
-edges[4].addRequest(new Request(priority, &quot;region4&quot;));
-edges[5].addRequest(new Request(priority, &quot;region5&quot;));
-} else {
-edges[6].addRequest(new Request(priority, &quot;region6&quot;));
-edges[7].addRequest(new Request(priority, &quot;region7&quot;));
+    public static void main(String[] args) {
+        Edge[] edges = new Edge[9];
+        for (int i = 0; i < 9; i++) {
+            edges[i] = new Edge(25);
+        }
 
-edges[8].addRequest(new Request(priority, &quot;region8&quot;));
+        for (int i = 0; i < 75; i++) {
+            // Add reqs with different priority
+            int Priority = i % 2; // Only two Priority levels: 0 (low) and 1 (high)
+            if (i < 25) {
+                edges[0].addReq(new Request(Priority, "region0"));
+                edges[1].addReq(new Request(Priority, "region1"));
+                edges[2].addReq(new Request(Priority, "region2"));
+            } else if (i < 50) {
+                edges[3].addReq(new Request(Priority, "region3"));
+                edges[4].addReq(new Request(Priority, "region4"));
+                edges[5].addReq(new Request(Priority, "region5"));
+            } else {
+                edges[6].addReq(new Request(Priority, "region6"));
+                edges[7].addReq(new Request(Priority, "region7"));
+                edges[8].addReq(new Request(Priority, "region8"));
+            }
+        }
+
+        for (Edge edge : edges) {
+            edge.processReq();
+        }
+    }
 }
-}
-for (Edge edge : edges) {
-edge.processRequests();
-}
-}
-}
+
 ----------------------------
 Edge to Edge:
 import java.util.PriorityQueue;
@@ -332,28 +354,28 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 class Request implements Comparable&lt;Request&gt; {
 private int id;
-private int priority;
-private long responseTime;
-public Request(int id, int priority) {
+private int pt; //priority
+private long resTime;//response time
+public Request(int id, int pt) {
 this.id = id;
-this.priority = priority;
+this.pt = pt;
 }
 public int getId() {
 return id;
 }
 public int getPriority() {
-return priority;
+return pt;
 }
 public long getResponseTime() {
-return responseTime;
+return resTime;
 }
-public void setResponseTime(long responseTime) {
-this.responseTime = responseTime;
+public void setResponseTime(long resTime) {
+this.resTime = resTime;
 }
 @Override
 
 public int compareTo(Request other) {
-return Integer.compare(other.priority, this.priority); // Higher priority first
+return Integer.compare(other.pt, this.pt); // Higher priority first
 }
 }
 class EdgeServer {
@@ -368,11 +390,11 @@ this.capacity = capacity;
 public boolean tryProcessRequest(Request request, int originatingEdgeId) {
 if (currentLoad.get() &lt; capacity) {
 currentLoad.incrementAndGet();
-long responseTime = generateResponseTime();
-request.setResponseTime(responseTime);
+long resTime = generateResponseTime();
+request.setResponseTime(resTime);
 System.out.println(&quot;Request &quot; + request.getId() + &quot; processed at Edge &quot; + id +
 &quot; (originating from Edge &quot; + originatingEdgeId + &quot;) with priority &quot; +
-request.getPriority() + &quot; and response time &quot; + responseTime + &quot; ms&quot;);
+request.getPriority() + &quot; and response time &quot; + resTime + &quot; ms&quot;);
 currentLoad.decrementAndGet();
 return true;
 } else {
@@ -388,28 +410,28 @@ return 50 + rand.nextInt(151); // Response time between 50ms to 200ms
 }
 public class Main2 {
 public static void main(String[] args) {
-final int NUMBER_OF_EDGE_SERVERS = 9;
-final int CAPACITY_PER_SERVER = 25;
-final int NUMBER_OF_REQUESTS = 225;
+final int num_edge= 9;// Number Of Edge Servers
+final int servercapacity = 25;// capacity per server
+final int num_reqts = 225;//number of requests
 
-EdgeServer[] edgeServers = new EdgeServer[NUMBER_OF_EDGE_SERVERS];
-for (int i = 0; i &lt; NUMBER_OF_EDGE_SERVERS; i++) {
-edgeServers[i] = new EdgeServer(i + 1, CAPACITY_PER_SERVER);
+EdgeServer[] edgeServers = new EdgeServer[num_edge];
+for (int i = 0; i &lt; num_edge; i++) {
+edgeServers[i] = new EdgeServer(i + 1, servercapacity);
 }
 PriorityQueue&lt;Request&gt; requestQueue = new PriorityQueue&lt;&gt;();
 Random rand = new Random();
-for (int i = 1; i &lt;= NUMBER_OF_REQUESTS; i++) {
-int priority = (i &lt;= 108) ? 1 : 0;
-requestQueue.add(new Request(i, priority));
+for (int i = 1; i &lt;= num_reqts; i++) {
+int pt = (i &lt;= 108) ? 1 : 0;
+requestQueue.add(new Request(i, pt)); //priority-pt
 }
-ExecutorService executor = Executors.newFixedThreadPool(NUMBER_OF_EDGE_SERVERS);
+ExecutorService executor = Executors.newFixedThreadPool(num_edge);
 while (!requestQueue.isEmpty()) {
 Request request = requestQueue.poll();
 executor.submit(() -&gt; {
-int startIndex = rand.nextInt(NUMBER_OF_EDGE_SERVERS); // Randomize start index
+int startIndex = rand.nextInt(num_edge); // Randomize start index
 boolean processed = false;
-for (int i = 0; i &lt; NUMBER_OF_EDGE_SERVERS; i++) {
-int index = (startIndex + i) % NUMBER_OF_EDGE_SERVERS;
+for (int i = 0; i &lt; num_edge; i++) {
+int index = (startIndex + i) % num_edge;
 if (edgeServers[index].tryProcessRequest(request, index + 1)) {
 processed = true;
 break;
@@ -423,6 +445,7 @@ System.out.println(&quot;All edge servers are full. Unable to process request &q
 executor.shutdown();
 }
 }
+
 -------------------------------------
 Edge to edge -When one server is full
 import java.util.PriorityQueue;
@@ -430,30 +453,29 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
-class Request implements Comparable&lt;Request&gt; {
+lass Request implements Comparable&lt;Request&gt; {
 private int id;
-private int priority;
-private long responseTime;
-public Request(int id, int priority) {
+private int pt;
+private long resTime;
+public Request(int id, int pt) {
 this.id = id;
-this.priority = priority;
+this.pt = pt;
 }
 public int getId() {
 return id;
 }
 public int getPriority() {
-return priority;
+return pt;
 }
 public long getResponseTime() {
-return responseTime;
+return resTime;
 }
-public void setResponseTime(long responseTime) {
-this.responseTime = responseTime;
+public void setResponseTime(long resTime) {
+this.resTime = resTime;
 }
 @Override
 public int compareTo(Request other) {
-return Integer.compare(other.priority, this.priority); // Higher priority first
+return Integer.compare(other.pt, this.pt); // Higher priority first
 }
 }
 class EdgeServer {
@@ -472,11 +494,11 @@ this.currentLoad.set(capacity); // Initialize as full
 public boolean tryProcessRequest(Request request, int originatingEdgeId) {
 if (currentLoad.get() &lt; capacity) {
 currentLoad.incrementAndGet();
-long responseTime = generateResponseTime();
-request.setResponseTime(responseTime);
+long resTime = generateResponseTime();
+request.setResponseTime(resTime);
 System.out.println(&quot;Request &quot; + request.getId() + &quot; processed at Edge &quot; + id +
 &quot; (originating from Edge &quot; + originatingEdgeId + &quot;) with priority &quot; +
-request.getPriority() + &quot; and response time &quot; + responseTime + &quot; ms&quot;);
+request.getPriority() + &quot; and response time &quot; + resTime + &quot; ms&quot;);
 currentLoad.decrementAndGet();
 return true;
 } else {
@@ -492,29 +514,29 @@ return 50 + rand.nextInt(151); // Response time between 50ms to 200ms
 }
 public class Main2 {
 public static void main(String[] args) {
-final int NUMBER_OF_EDGE_SERVERS = 9;
-final int CAPACITY_PER_SERVER = 25;
-final int NUMBER_OF_REQUESTS = 225;
-EdgeServer[] edgeServers = new EdgeServer[NUMBER_OF_EDGE_SERVERS];
-for (int i = 0; i &lt; NUMBER_OF_EDGE_SERVERS; i++) {
+final int num_edge= 9;// Number of Edge Servers
+final int servercapacity = 25;// capacity per server
+final int num_reqts = 225;//number of requests
+EdgeServer[] edgeServers = new EdgeServer[num_edge];
+for (int i = 0; i &lt; num_edge; i++) {
 boolean initializeFull = (i == 2); // Initialize only Edge Server 3 as full
-edgeServers[i] = new EdgeServer(i + 1, CAPACITY_PER_SERVER, initializeFull);
+edgeServers[i] = new EdgeServer(i + 1, servercapacity, initializeFull);
 }
 PriorityQueue&lt;Request&gt; requestQueue = new PriorityQueue&lt;&gt;();
 Random rand = new Random();
-for (int i = 1; i &lt;= NUMBER_OF_REQUESTS; i++) {
+for (int i = 1; i &lt;= num_reqts; i++) {
 int priority = (i &lt;= 108) ? 1 : 0;
 requestQueue.add(new Request(i, priority));
 }
 
-ExecutorService executor = Executors.newFixedThreadPool(NUMBER_OF_EDGE_SERVERS);
+ExecutorService executor = Executors.newFixedThreadPool(num_edge);
 while (!requestQueue.isEmpty()) {
 Request request = requestQueue.poll();
 executor.submit(() -&gt; {
-int startIndex = rand.nextInt(NUMBER_OF_EDGE_SERVERS); // Randomize start index
+int startIndex = rand.nextInt(num_edge); // Randomize start index
 boolean processed = false;
-for (int i = 0; i &lt; NUMBER_OF_EDGE_SERVERS; i++) {
-int index = (startIndex + i) % NUMBER_OF_EDGE_SERVERS;
+for (int i = 0; i &lt; num_edge; i++) {
+int index = (startIndex + i) % num_edge;
 if (edgeServers[index].tryProcessRequest(request, index + 1)) {
 processed = true;
 break;
@@ -528,3 +550,14 @@ System.out.println(&quot;All edge servers are full. Unable to process request &q
 executor.shutdown();
 }
 }
+
+
+
+---------------
+Reference:
+https://www.w3schools.com/java/default.asp
+https://www.geeksforgeeks.org/this-reference-in-java/?ref=lbp
+https://www.geeksforgeeks.org/priority-queue-class-in-java/
+https://www.geeksforgeeks.org/java-lang-thread-class-java/
+https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ExecutorService.html
+https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html
